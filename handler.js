@@ -2,6 +2,14 @@ const express = require("express");
 const cors = require("cors");
 const serverless = require("serverless-http");
 const bodyParser = require("body-parser");
+const mysql = require("mysql");
+
+const connection = mysql.createConnection({
+  host: process.env.DB_HOST,
+  user: process.env.DB_USER,
+  password: process.env.DB_PASSWORD,
+  database: 'todo_app'
+});
 
 const app = express();
 
@@ -11,31 +19,53 @@ app.use(cors());
 app.use(bodyParser.json());
 
 app.get("/tasks", function(request, response){
-  response.status(200).send({
-    tasks: [
-      {id: 1, text: "Clean the cat", completed: false, date: "2019-10-13"},
-      {id: 2, text: "Wash the car", completed: true, date: "2019-10-14"},
-      {id: 3, text: "Make dinner", completed: false, date: "2019-10-10"}
-    ]
-  });
+  connection.query("SELECT * FROM tasks", function (err, data){
+    if(err){
+      response.status(500).json({error: err});
+    }else{
+      response.status(200).json(data);
+    }
+  })
 });
 
 app.delete("/tasks/:taskId", function(request, response){
   //Delete the task
-  const id = request.params.taskId;
-  response.status(200).send("Received a request to delete task ID: "+id);
+  const taskId = request.params.taskId;
+  connection.query("DELETE from tasks WHERE taskId = ?", [taskId], function (err){
+  if(err){
+    response.status(500).json({error: err});
+  }else{
+    response.sendStatus(200);
+  }
+  });
 });
 
 app.post("/tasks", function(request, response){
   //Create a new task
   const task = request.body;
-  response.status(201).send("Created a new task with text: "+task.text);
+  const q = "INSERT tasks SET userId = ?, taskText = ?, completed = ?";
+  connection.query(q, [task.userId, task.taskText, task.completed], function (err, data){
+    if(err){
+      response.status(500).json({error: err});
+    }else{
+      response.status(201).send("Created a new task with text: "+task.taskText);
+    }
+  })
 });
 
 app.put("/tasks/:taskId",function (request, response){
   // Update task
-  const id = request.params.taskId;
   const task = request.body;
-  response.status(200).send("Received request to update task: " + task.text);
+  const taskId = request.params.taskId;
+  //expected {text, completed}
+  const q = "UPDATE tasks SET taskText = ?, completed = ? WHERE taskId = ?";
+  connection.query(q, [task.taskText, task.completed, taskId], function (err, data){
+    if(err){
+      response.status(500).json({error: err});
+    }else{
+      response.sendStatus(205);
+    }
+  })
 });
+
 module.exports.tasks = serverless(app);
