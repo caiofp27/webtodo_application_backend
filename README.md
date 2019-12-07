@@ -1,6 +1,6 @@
 # Todo Application - Backend
 
-This is the back end API of a Todo Application, built throughout the [Tech Returners](https://techreturners.com) Your Journey Into Tech course. It is consumed by a front end React application, available [here](https://github.com/caiofp27/webtodo_application_backend) and connects to an RDS Database.
+This is the back end API of a Todo Application, built throughout the [Tech Returners](https://techreturners.com) Your Journey Into Tech course. It is consumed by a front end React application, available [here](https://github.com/caiofp27/react_webtodo_application) and connects to an RDS Database.
 
 The hosted version of the application is available here: [https://caiofp27.github.io/react_webtodo_application](https://caiofp27.github.io/react_webtodo_application).
 
